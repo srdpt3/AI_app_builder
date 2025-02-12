@@ -9,10 +9,9 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
+  DialogDescription,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 const SignInDialog = ({ openDialog, closeDialog }) => {
@@ -27,6 +26,8 @@ const SignInDialog = ({ openDialog, closeDialog }) => {
 
       console.log(userInfo);
       setUserDetail(userInfo?.data);
+
+      //save this inside out database
       closeDialog(false);
     },
     onError: (errorResponse) => console.log(errorResponse),
@@ -35,16 +36,17 @@ const SignInDialog = ({ openDialog, closeDialog }) => {
     <Dialog open={openDialog} onOpenChange={closeDialog}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle></DialogTitle>
+          <DialogTitle className="text-2xl font-bold">
+            Sign In Required
+          </DialogTitle>
           <DialogDescription>
-            <div className="flex flex-col justify-center items-center gap-3">
-              <h2 className="text-2xl font-bold">{lookup.SIGNIN_HEADING}</h2>
-              <p className=" mt-2 text-sm text-gray-500">
-                {lookup.SIGNIN_SUBHEADING}
-              </p>
+            <div className="flex flex-col gap-2">
+              <span className="mt-2 text-sm text-gray-500">
+                Please sign in to continue using our services
+              </span>
               <Button
                 onClick={() => googleLogin()}
-                className="bg-blue-500  text-white hover:bg-blue-600"
+                className="bg-blue-500 text-white hover:bg-blue-600"
               >
                 Sign in with Google
               </Button>
