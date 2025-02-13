@@ -5,6 +5,10 @@ import axios from "axios";
 import { UserDetailContext } from "@/app/context/UserDetailContext";
 import { useGoogleLogin } from "@react-oauth/google";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { useConvexClient } from "convex/react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   Dialog,
@@ -16,6 +20,8 @@ import {
 
 const SignInDialog = ({ openDialog, closeDialog }) => {
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
+  // const db = useConvexClient();
+  const createUser = useMutation(api.users.createUser);
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       console.log(tokenResponse);
@@ -25,8 +31,18 @@ const SignInDialog = ({ openDialog, closeDialog }) => {
       );
 
       console.log(userInfo);
+      const user = userInfo?.data;
+      await createUser({
+        name: user.name,
+        email: user.email,
+        image: user.picture,
+        authId: uuidv4(),
+      });
       setUserDetail(userInfo?.data);
 
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(userInfo?.data));
+      }
       //save this inside out database
       closeDialog(false);
     },

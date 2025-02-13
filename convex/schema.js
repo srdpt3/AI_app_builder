@@ -5,13 +5,10 @@ export default defineSchema({
   users: defineTable({
     name: v.string(),
     email: v.string(),
-    pciture: v.optional(v.string()),
-    // Timestamp for when the user was created
+    image: v.optional(v.string()),
+    authId: v.string(),
     createdAt: v.number(),
-
-    // You can store the auth provider's user ID if using authentication
-    uid: v.string(),
   })
     .index("by_email", ["email"])
-    .index("uid", ["uid"]),
+    .index("by_authId", ["authId"]),
 });
