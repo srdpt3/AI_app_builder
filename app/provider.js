@@ -18,15 +18,17 @@ export function Provider({ children }) {
   const IsAuthenticatd = async () => {
     if (typeof window !== "undefined") {
       const user = JSON.parse(localStorage.getItem("user"));
+
       //fetch from database
       const result = await convex.query(api.users.GetUser, {
-        email: user.email,
+        email: user?.email,
       });
-      console.log(IsAuthenticatd + " " + result);
+      console.log(result);
       if (result) {
         return true;
       }
     }
+    console.log("IsAuthenticatd" + " " + false);
     return false;
   };
 

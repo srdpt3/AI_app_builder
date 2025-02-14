@@ -55,23 +55,24 @@ const SignInDialog = ({ openDialog, closeDialog }) => {
           <DialogTitle className="text-2xl font-bold">
             Sign In Required
           </DialogTitle>
-          <DialogDescription>
-            <div className="flex flex-col gap-2">
-              <span className="mt-2 text-sm text-gray-500">
-                Please sign in to continue using our services
-              </span>
-              <Button
-                onClick={() => googleLogin()}
-                className="bg-blue-500 text-white hover:bg-blue-600"
-              >
-                Sign in with Google
-              </Button>
-              <p className="text-sm text-gray-500">
-                {lookup.SIGNIn_AGREEMENT_TEXT}
-              </p>
-            </div>
+          <DialogDescription className="text-sm text-muted-foreground">
+            Sign in to your account
           </DialogDescription>
+          <span className="text-sm text-gray-500">
+            Sign in to access your account and continue your work
+          </span>
         </DialogHeader>
+        <div className="mt-4 flex flex-col gap-4">
+          <Button
+            onClick={() => googleLogin()}
+            className="bg-blue-500 text-white hover:bg-blue-600"
+          >
+            Sign in with Google
+          </Button>
+          <p className="text-sm text-gray-500">
+            {lookup.SIGNIn_AGREEMENT_TEXT}
+          </p>
+        </div>
       </DialogContent>
     </Dialog>
   );
