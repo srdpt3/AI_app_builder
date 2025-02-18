@@ -8,7 +8,10 @@ export default defineSchema({
     image: v.optional(v.string()),
     authId: v.string(),
     createdAt: v.number(),
-  })
-    .index("by_email", ["email"])
-    .index("by_authId", ["authId"]),
+  }),
+  workspace: defineTable({
+    message: v.any(),
+    fileDate: v.optional(v.any()),
+    user: v.id("users"),
+  }),
 });

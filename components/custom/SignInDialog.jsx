@@ -30,7 +30,6 @@ const SignInDialog = ({ openDialog, closeDialog }) => {
         { headers: { Authorization: "Bearer " + tokenResponse?.access_token } },
       );
 
-      console.log(userInfo);
       const user = userInfo?.data;
       await createUser({
         name: user.name,
@@ -38,6 +37,8 @@ const SignInDialog = ({ openDialog, closeDialog }) => {
         image: user.picture,
         authId: uuidv4(),
       });
+      console.log("userInfo?.data " + userInfo?.data);
+
       setUserDetail(userInfo?.data);
 
       if (typeof window !== "undefined") {

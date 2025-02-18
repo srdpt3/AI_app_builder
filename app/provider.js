@@ -12,25 +12,43 @@ export function Provider({ children }) {
   const [userDetail, setUserDetail] = useState(null);
   const [messages, setMessages] = useState([]);
   const convex = useConvex();
-  useEffect(() => {
-    IsAuthenticatd();
-  }, []);
-  const IsAuthenticatd = async () => {
-    if (typeof window !== "undefined") {
-      const user = JSON.parse(localStorage.getItem("user"));
 
-      //fetch from database
-      const result = await convex.query(api.users.GetUser, {
-        email: user?.email,
-      });
-      console.log(result);
-      if (result) {
-        return true;
+  useEffect(() => {
+    const isAuthenticated = async () => {
+      if (typeof window === "undefined") return false;
+
+      try {
+        const storedUser = localStorage.getItem("user");
+        console.log("Stored user from localStorage:", storedUser);
+
+        if (!storedUser) return false;
+
+        const user = JSON.parse(storedUser);
+        console.log("Parsed user:", user);
+
+        if (!user?.email) return false;
+
+        // fetch from database
+        const result = await convex.query(api.users.GetUser, {
+          email: user.email,
+        });
+        console.log("Database query result:", result);
+
+        if (result) {
+          setUserDetail(result);
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error("Authentication check failed:", error);
+        return false;
       }
-    }
-    console.log("IsAuthenticatd" + " " + false);
-    return false;
-  };
+    };
+
+    isAuthenticated();
+  }, [convex]);
+
+  console.log("Current userDetail state:", userDetail);
 
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>

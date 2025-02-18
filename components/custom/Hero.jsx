@@ -6,21 +6,38 @@ import React, { useState, useContext } from "react";
 import { MessagesContext } from "@/app/context/MessagesContext";
 import { UserDetailContext } from "@/app/context/UserDetailContext";
 import SignInDialog from "./SignInDialog";
-
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useRouter } from "next/navigation";
 const Hero = () => {
   const [userInput, setUserInput] = useState();
   const { messages, setMessages } = useContext(MessagesContext);
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
   const [openDialog, setOpenDialog] = useState(false);
-  const onGenerate = (input) => {
-    console.log(userDetail);
+  const createWorkspace = useMutation(api.workspace.createWorkspace);
+
+  const router = useRouter();
+  const onGenerate = async (input) => {
     if (!userDetail?.name) {
+      console.log("userDetail " + userDetail);
+
+      console.log("userDetail._id" + userDetail._id);
+
       setOpenDialog(true);
       return;
     }
-    setMessages({ role: "user", content: input });
-    console.log(input);
+    const message = { role: "user", content: input };
+    console.log("message" + message);
+
+    setMessages(message);
+
+    const workspaceId = await createWorkspace({
+      user: userDetail._id,
+      message: [message],
+    });
     console.log(userDetail);
+    console.log("workspaceId" + workspaceId);
+    router.push(`/workspace/${workspaceId}`);
   };
   return (
     <div className="flex flex-col items-center justify-center mt-36 xl:mt-42 gap-2">
