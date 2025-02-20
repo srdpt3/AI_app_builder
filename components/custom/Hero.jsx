@@ -21,8 +21,6 @@ const Hero = () => {
     if (!userDetail?.name) {
       console.log("userDetail " + userDetail);
 
-      console.log("userDetail._id" + userDetail._id);
-
       setOpenDialog(true);
       return;
     }

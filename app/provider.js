@@ -1,13 +1,13 @@
 "use client";
 import React, { createContext, useEffect, useState } from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import Header from "@/components/custom/Header";
 import { MessagesContext } from "./context/MessagesContext";
 import { UserDetailContext } from "./context/UserDetailContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
-// 2. 단일 Provider 컴포넌트
+import Header from "@/components/custom/Header";
+
 export function Provider({ children }) {
   const [userDetail, setUserDetail] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -60,7 +60,9 @@ export function Provider({ children }) {
             enableSystem
             disableTransitionOnChange
           >
-            <Header />
+            <div className="sticky p-10">
+              <Header />
+            </div>
             {children}
           </NextThemesProvider>
         </MessagesContext.Provider>
