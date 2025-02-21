@@ -11,29 +11,59 @@ import colors from "@/data/colors";
 import { ArrowRight, Link2 } from "lucide-react";
 import { useState } from "react";
 import lookup from "@/data/lookup";
+import axios from "axios";
+import Prompt from "@/data/prompt";
+import { chatSession } from "@/app/configs/AiModel";
+import Spinner from "../custom/Spinner";
 const ChatView = () => {
   const { id } = useParams();
   const convex = useConvex();
   const { messages, setMessages } = useContext(MessagesContext);
   const { userDetail } = useContext(UserDetailContext);
-  const [userInput, setUserInput] = useState("");
+  const [userInput, setUserInput] = useState();
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     id && GetWorkspaceData();
   }, [id]);
+
+  useEffect(() => {
+    if (messages?.length > 0) {
+      const role = messages[messages?.length - 1]?.role;
+      if (role === "user") {
+        GetAIResponse();
+      }
+    }
+    //
+  }, [messages]);
 
   const GetWorkspaceData = async () => {
     const workspace = await convex.query(api.workspace.GetWorkspace, {
       workspaceId: id,
     });
     setMessages(workspace?.message || []);
-    console.log(workspace);
+    console.log(messages);
+  };
+
+  const GetAIResponse = async () => {
+    setIsLoading(true);
+    const promptData = JSON.stringify(messages) + Prompt.DEFAULT_PROMPT;
+    console.log(promptData);
+    const result = await axios.post("/api/ai-chat", {
+      prompt: promptData,
+    });
+    console.log(result.data.result);
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: result.data.result },
+    ]);
+    setIsLoading(false);
   };
 
   const messageList = Array.isArray(messages) ? messages : [];
 
   return (
     <div className="relative h-[85vh] flex flex-col">
-      <div className="flex-1 overflow-y-scroll scrollbar-hide">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none]">
         {messageList.map((msg, index) => (
           <div
             key={index}
@@ -53,6 +83,7 @@ const ChatView = () => {
               />
             )}
             <h2>{msg.content}</h2>
+            {isLoading && <Spinner />}
           </div>
         ))}
       </div>
