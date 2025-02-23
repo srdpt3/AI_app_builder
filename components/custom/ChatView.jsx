@@ -103,7 +103,9 @@ const ChatView = () => {
                 unoptimized
               />
             )}
-            <h2>{msg.content}</h2>
+            <div className="markdown-content">
+              <ReactMarkdown>{msg.content}</ReactMarkdown>
+            </div>
           </div>
         ))}
         {isLoading && (
