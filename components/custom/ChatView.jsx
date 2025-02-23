@@ -1,6 +1,6 @@
 "use client";
 import { useQuery } from "convex/react";
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext, useRef } from "react";
 import { api } from "@/convex/_generated/api";
 import { useParams } from "next/navigation";
 import { useConvex } from "convex/react";
@@ -8,20 +8,24 @@ import { MessagesContext } from "@/app/context/MessagesContext";
 import { UserDetailContext } from "@/app/context/UserDetailContext";
 import Image from "next/image";
 import colors from "@/data/colors";
-import { ArrowRight, Link2 } from "lucide-react";
+import { ArrowRight, Link2, Loader2Icon } from "lucide-react";
 import { useState } from "react";
 import lookup from "@/data/lookup";
 import axios from "axios";
 import Prompt from "@/data/prompt";
-import { chatSession } from "@/app/configs/AiModel";
-import Spinner from "../custom/Spinner";
+import { useMutation } from "convex/react";
+import ReactMarkdown from "react-markdown";
+
 const ChatView = () => {
   const { id } = useParams();
   const convex = useConvex();
   const { messages, setMessages } = useContext(MessagesContext);
   const { userDetail } = useContext(UserDetailContext);
+  const updateMessage = useMutation(api.workspace.updateMessage);
   const [userInput, setUserInput] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const messageEndRef = useRef(null);
+
   useEffect(() => {
     id && GetWorkspaceData();
   }, [id]);
@@ -34,6 +38,10 @@ const ChatView = () => {
       }
     }
     //
+  }, [messages]);
+
+  useEffect(() => {
+    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const GetWorkspaceData = async () => {
@@ -52,11 +60,24 @@ const ChatView = () => {
       prompt: promptData,
     });
     console.log(result.data.result);
+    const aiResponse = {
+      role: "assistant",
+      content: result.data.result,
+    };
     setMessages((prev) => [
       ...prev,
       { role: "assistant", content: result.data.result },
     ]);
+    await updateMessage({
+      workspaceId: id,
+      message: [...messages, aiResponse],
+    });
     setIsLoading(false);
+  };
+
+  const onGenerate = async () => {
+    setMessages((prev) => [...prev, { role: "user", content: userInput }]);
+    setUserInput("");
   };
 
   const messageList = Array.isArray(messages) ? messages : [];
@@ -67,7 +88,7 @@ const ChatView = () => {
         {messageList.map((msg, index) => (
           <div
             key={index}
-            className="p-3 rounded-lg flex items-start gap-2 mb-2"
+            className="p-3 rounded-lg flex items-start gap-2 mb-2 leading-7"
             style={{
               backgroundColor: colors.CHAT_BACKGROUND,
             }}
@@ -83,9 +104,20 @@ const ChatView = () => {
               />
             )}
             <h2>{msg.content}</h2>
-            {isLoading && <Spinner />}
           </div>
         ))}
+        {isLoading && (
+          <div
+            className="p-3 rounded-lg flex items-start gap-2 mb-2"
+            style={{
+              backgroundColor: colors.CHAT_BACKGROUND,
+            }}
+          >
+            <h2>Generating repsonse...</h2>
+            <Loader2Icon className="animate-spin" />
+          </div>
+        )}
+        <div ref={messageEndRef} />
       </div>
       {/* Input Section */}
       <div
@@ -99,6 +131,7 @@ const ChatView = () => {
             placeholder={lookup.INPUT_PLACEHOLDER}
             onChange={(e) => setUserInput(e.target.value)}
             className="outline-none border-none bg-transparent w-full  h-32 resize-none"
+            value={userInput}
           />
           {userInput && (
             <ArrowRight
