@@ -8,11 +8,40 @@ import {
   SandpackPreview,
   SandpackFileExplorer,
 } from "@codesandbox/sandpack-react";
-import { useState } from "react";
+import { generateAICode } from "@/app/configs/AiModel";
+import { useState, useContext, useEffect } from "react";
 import lookup from "@/data/lookup";
+import prompts from "@/data/prompts";
+import { MessagesContext } from "@/app/context/MessagesContext";
 const CodeView = () => {
   const [activeTab, setActiveTab] = useState("code");
   const [files, setFiles] = useState(lookup.DEFAULT_FILE);
+  const { messages, setMessages } = useContext(MessagesContext);
+
+  useEffect(() => {
+    if (messages?.length > 0) {
+      const role = messages[messages?.length - 1]?.role;
+      if (role === "user") {
+        handleGenerateCode();
+      }
+    }
+    //
+  }, [messages]);
+  const handleGenerateCode = async () => {
+    console.log(messages[messages?.length - 1]?.content);
+    const prompt =
+      messages[messages?.length - 1]?.content + prompts.CODE_GEN_PROMPT;
+    const response = await fetch("/api/gen-ai-code", {
+      prompt: prompt,
+    });
+
+    console.log(rresponse);
+    const aiResponse = response.data;
+    // const aiResponseJson = JSON.parse(aiResponse);
+    const mergedFiles = { ...lookup.DEFAULT_FILE, ...aiResponse?.files };
+    setFiles(mergedFiles);
+  };
+
   return (
     <div className="col-span-1">
       <div className="bg-[#181818] w-full p-2 border">
