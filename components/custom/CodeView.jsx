@@ -13,12 +13,18 @@ import { useState, useContext, useEffect } from "react";
 import lookup from "@/data/lookup";
 import prompts from "@/data/prompts";
 import { MessagesContext } from "@/app/context/MessagesContext";
+import { updateFiles } from "@/convex/workspace";
+import { useMutation } from "convex/react";
 import axios from "axios";
+import { useParams } from "next/navigation";
+import { api } from "@/convex/_generated/api";
+
 const CodeView = () => {
+  const { id } = useParams();
   const [activeTab, setActiveTab] = useState("code");
   const [files, setFiles] = useState(lookup.DEFAULT_FILE);
   const { messages, setMessages } = useContext(MessagesContext);
-
+  const updateFiles = useMutation(api.workspace.updateFiles);
   useEffect(() => {
     if (messages?.length > 0) {
       const role = messages[messages?.length - 1]?.role;
@@ -30,8 +36,7 @@ const CodeView = () => {
   }, [messages]);
   const handleGenerateCode = async () => {
     console.log(messages[messages?.length - 1]?.content);
-    const prompt =
-      messages[messages?.length - 1]?.content + prompts.CODE_GEN_PROMPT;
+    const prompt = JSON.stringify(messages) + " " + prompts.CODE_GEN_PROMPT;
 
     try {
       const response = await fetch("/api/gen-ai-code", {
@@ -73,6 +78,10 @@ const CodeView = () => {
 
       console.log("Updated files:", newFiles);
       setFiles(newFiles);
+      await updateFiles({
+        workspaceId: id,
+        files: data?.files,
+      });
     } catch (error) {
       console.error("Error generating code:", error);
       // Optionally add user feedback here

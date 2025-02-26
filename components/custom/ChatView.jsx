@@ -59,7 +59,7 @@ const ChatView = () => {
     const result = await axios.post("/api/ai-chat", {
       prompt: promptData,
     });
-    console.log(result.data.result);
+    // console.log(result.data.result);
     const aiResponse = {
       role: "assistant",
       content: result.data.result,

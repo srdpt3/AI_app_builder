@@ -35,3 +35,33 @@ export const updateMessage = mutation({
     });
   },
 });
+
+export const updateFiles = mutation({
+  args: {
+    workspaceId: v.id("workspace"),
+    files: v.any(),
+  },
+  handler: async (ctx, args) => {
+    const { workspaceId, files } = args;
+
+    // Log the inputs to help with debugging
+    console.log("Updating fileData for workspace:", workspaceId);
+
+    try {
+      // Check if workspace exists
+      const workspace = await ctx.db.get(workspaceId);
+      if (!workspace) {
+        throw new Error("Workspace not found");
+      }
+
+      // Update the workspace with the files using the correct field name 'fileData'
+      const result = await ctx.db.patch(workspaceId, { fileData: files });
+
+      console.log("Update result:", result);
+      return result;
+    } catch (error) {
+      console.error("Error updating fileData:", error);
+      throw error;
+    }
+  },
+});
