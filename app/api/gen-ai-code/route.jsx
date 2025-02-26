@@ -5,7 +5,8 @@ export async function POST(req) {
   try {
     const { prompt } = await req.json();
     const response = await generateAICode.sendMessage(prompt);
-    return NextResponse.json({ result: response.response.text() });
+    const aiResponse = response.response.text();
+    return NextResponse.json(JSON.parse(aiResponse));
   } catch (error) {
     console.error("Error in AI code generation:", error);
     return NextResponse.json(
