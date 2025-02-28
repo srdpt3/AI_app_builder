@@ -18,13 +18,30 @@ import { useMutation } from "convex/react";
 import axios from "axios";
 import { useParams } from "next/navigation";
 import { api } from "@/convex/_generated/api";
-
+import { useConvex } from "convex/react";
+import { Loader2 } from "lucide-react";
 const CodeView = () => {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("code");
   const [files, setFiles] = useState(lookup.DEFAULT_FILE);
   const { messages, setMessages } = useContext(MessagesContext);
   const updateFiles = useMutation(api.workspace.updateFiles);
+  const convex = useConvex();
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    id && getFiles();
+  }, [id]);
+
+  const getFiles = async () => {
+    setLoading(true);
+    const workspace = await convex.query(api.workspace.GetWorkspace, {
+      workspaceId: id,
+    });
+    const mergedFiles = { ...lookup.DEFAULT_FILE, ...workspace?.fileData };
+    setFiles(mergedFiles);
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (messages?.length > 0) {
       const role = messages[messages?.length - 1]?.role;
@@ -35,6 +52,7 @@ const CodeView = () => {
     //
   }, [messages]);
   const handleGenerateCode = async () => {
+    setLoading(true);
     console.log(messages[messages?.length - 1]?.content);
     const prompt = JSON.stringify(messages) + " " + prompts.CODE_GEN_PROMPT;
 
@@ -82,6 +100,7 @@ const CodeView = () => {
         workspaceId: id,
         files: data?.files,
       });
+      setLoading(false);
     } catch (error) {
       console.error("Error generating code:", error);
       // Optionally add user feedback here
@@ -89,57 +108,70 @@ const CodeView = () => {
   };
 
   return (
-    <div className="col-span-1">
-      <div className="bg-[#181818] w-full p-2 border">
-        <div className="flex items-center justify-between flex-wrap shrink-0 rounded-full bg-black p-1 w-[140px] gap-2">
-          <div className="flex gap-2 items-center">
-            <h2
-              onClick={() => setActiveTab("code")}
-              className={`text-sm cursor-pointer flex items-center justify-center h-8 ${
-                activeTab === "code"
-                  ? "text-blue-500 bg-blue-500 bg-opacity-25 p-1 px-2 rounded-full"
-                  : "text-gray-400 p-1 px-2"
-              }`}
-            >
-              Code
-            </h2>
-            <h2
-              onClick={() => setActiveTab("preview")}
-              className={`text-sm cursor-pointer flex items-center justify-center h-8 ${
-                activeTab === "preview"
-                  ? "text-blue-500 bg-blue-500 bg-opacity-25 p-1 px-2 rounded-full"
-                  : "text-gray-400 p-1 px-2"
-              }`}
-            >
-              Preview
-            </h2>
+    <div className="col-span-1 relative">
+      <div
+        className={`${loading ? "blur-sm transition-all duration-300" : ""}`}
+      >
+        <div className="bg-[#181818] w-full p-2 border">
+          <div className="flex items-center justify-between flex-wrap shrink-0 rounded-full bg-black p-1 w-[140px] gap-2">
+            <div className="flex gap-2 items-center">
+              <h2
+                onClick={() => setActiveTab("code")}
+                className={`text-sm cursor-pointer flex items-center justify-center h-8 ${
+                  activeTab === "code"
+                    ? "text-blue-500 bg-blue-500 bg-opacity-25 p-1 px-2 rounded-full"
+                    : "text-gray-400 p-1 px-2"
+                }`}
+              >
+                Code
+              </h2>
+              <h2
+                onClick={() => setActiveTab("preview")}
+                className={`text-sm cursor-pointer flex items-center justify-center h-8 ${
+                  activeTab === "preview"
+                    ? "text-blue-500 bg-blue-500 bg-opacity-25 p-1 px-2 rounded-full"
+                    : "text-gray-400 p-1 px-2"
+                }`}
+              >
+                Preview
+              </h2>
+            </div>
           </div>
         </div>
+        <SandpackProvider
+          template="react"
+          theme="dark"
+          files={files}
+          customSetup={{
+            dependencies: {
+              ...lookup.DEPENDANCY,
+            },
+          }}
+          options={{
+            externalResources: ["https://cdn.tailwindcss.com"],
+          }}
+        >
+          <SandpackLayout className="h-[calc(100vh-200px)]">
+            {activeTab === "code" ? (
+              <>
+                <SandpackFileExplorer style={{ height: "80vh" }} />
+                <SandpackCodeEditor style={{ height: "80vh" }} />
+              </>
+            ) : (
+              <SandpackPreview
+                style={{ height: "100vh" }}
+                showNavigator={true}
+              />
+            )}
+          </SandpackLayout>
+        </SandpackProvider>
       </div>
-      <SandpackProvider
-        template="react"
-        theme="dark"
-        files={files}
-        customSetup={{
-          dependencies: {
-            ...lookup.DEPENDANCY,
-          },
-        }}
-        options={{
-          externalResources: ["https://cdn.tailwindcss.com"],
-        }}
-      >
-        <SandpackLayout className="h-[calc(100vh-200px)]">
-          {activeTab === "code" ? (
-            <>
-              <SandpackFileExplorer style={{ height: "80vh" }} />
-              <SandpackCodeEditor style={{ height: "80vh" }} />
-            </>
-          ) : (
-            <SandpackPreview style={{ height: "100vh" }} showNavigator={true} />
-          )}
-        </SandpackLayout>
-      </SandpackProvider>
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center z-10 flex-col gap-2 bg-black/10">
+          <Loader2 className="w-10 h-10 animate-spin" />
+          <h2 className="text-white text-sm">Generating code...</h2>
+        </div>
+      )}
     </div>
   );
 };

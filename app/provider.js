@@ -7,7 +7,8 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Header from "@/components/custom/Header";
-
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/custom/AppSideBar";
 export function Provider({ children }) {
   const [userDetail, setUserDetail] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -60,10 +61,13 @@ export function Provider({ children }) {
             enableSystem
             disableTransitionOnChange
           >
-            <div className="sticky p-10">
+            <div className="sticky p-5">
               <Header />
             </div>
-            {children}
+            <SidebarProvider>
+              <AppSidebar />
+              {children}
+            </SidebarProvider>
           </NextThemesProvider>
         </MessagesContext.Provider>
       </UserDetailContext.Provider>
