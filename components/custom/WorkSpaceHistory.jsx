@@ -1,32 +1,40 @@
 import React, { useContext } from "react";
-import { getWorkspaceHistory } from "@/convex/_generated/api";
-import { useQuery } from "convex/react";
 import { UserDetailContext } from "@/app/context/UserDetailContext";
 import { useConvex } from "convex/react";
 import { useEffect } from "react";
 import { api } from "@/convex/_generated/api";
+import { useState } from "react";
+
 const WorkSpaceHistory = () => {
   const { userDetail } = useContext(UserDetailContext);
   const convex = useConvex();
+  const [workspaceHistory, setWorkspaceHistory] = useState([]);
+  useEffect(() => {
+    if (userDetail) {
+      GetAllWorkspaceHistory();
+    }
+  }, [userDetail]);
 
   const GetAllWorkspaceHistory = async () => {
-    const data = await convex.query(api.workspace.getWorkspaceHistory, {
-      userId: "j972ab3681ekrhp86wtatpv5j17axrk5",
+    console.log("GetAllWorkspaceHistory triggered, userDetail:", userDetail);
+    const data = await convex.query(api.workspace.GetAllWorkspaceHistory, {
+      userId: userDetail?._id,
     });
     console.log(data);
+    setWorkspaceHistory(data);
     return data;
   };
-
-  useEffect(() => {
-    userDetail && GetAllWorkspaceHistory();
-  }, [userDetail]);
 
   return (
     <div>
       <h2 className="text-lg font-bold">WorkSpace History</h2>
-      {/* {data?.map((workspace) => (
-        <div key={workspace._id}>{workspace.name}</div>
-      ))} */}
+      <div className="flex flex-col gap-2">
+        {workspaceHistory?.map((workspace, index) => (
+          <h2 className="text-sm text-gray-500 mt-2 font-bold" key={index}>
+            {workspace?.message[0]?.content}
+          </h2>
+        ))}
+      </div>
     </div>
   );
 };

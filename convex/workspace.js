@@ -66,39 +66,14 @@ export const updateFiles = mutation({
   },
 });
 
-export const getWorkspaceHistory = query({
+export const GetAllWorkspaceHistory = query({
   args: {
-    id: v.optional(v.id("workspace")),
-    userId: v.optional(v.any()),
+    userId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    // If id is provided, return that specific workspace
-    if (args.id) {
-      const workspace = await ctx.db.get(args.id);
-      return workspace ? [workspace] : [];
-    }
-
-    // Check if userId is a valid ID and use it appropriately
-    if (args.userId) {
-      // If it looks like a workspace ID, get that specific workspace
-      if (typeof args.userId === "string" && args.userId.startsWith("j")) {
-        const workspace = await ctx.db.get(args.userId);
-        return workspace ? [workspace] : [];
-      }
-
-      // Otherwise try to use it as a user ID
-      try {
-        return await ctx.db
-          .query("workspace")
-          .filter((q) => q.eq(q.field("user"), args.userId))
-          .collect();
-      } catch (e) {
-        console.error("Error querying by userId:", e);
-        return [];
-      }
-    }
-
-    // Return empty array if neither parameter is provided
-    return [];
+    return await ctx.db
+      .query("workspace")
+      .filter((q) => q.eq(q.field("user"), args.userId))
+      .collect();
   },
 });
