@@ -4,7 +4,7 @@ import { useConvex } from "convex/react";
 import { useEffect } from "react";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
-
+import Link from "next/link";
 const WorkSpaceHistory = () => {
   const { userDetail } = useContext(UserDetailContext);
   const convex = useConvex();
@@ -30,9 +30,11 @@ const WorkSpaceHistory = () => {
       <h2 className="text-lg font-bold">WorkSpace History</h2>
       <div className="flex flex-col gap-2">
         {workspaceHistory?.map((workspace, index) => (
-          <h2 className="text-sm text-gray-500 mt-2 font-bold" key={index}>
-            {workspace?.message[0]?.content}
-          </h2>
+          <Link href={`/workspace/${workspace?._id}`} key={index}>
+            <h2 className="text-sm text-gray-500 mt-2 font-bold" key={index}>
+              {workspace?.message[0]?.content}
+            </h2>
+          </Link>
         ))}
       </div>
     </div>
