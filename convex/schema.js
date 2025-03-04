@@ -8,6 +8,7 @@ export default defineSchema({
     image: v.optional(v.string()),
     authId: v.string(),
     createdAt: v.number(),
+    token: v.optional(v.number()),
   }),
   workspace: defineTable({
     message: v.any(),

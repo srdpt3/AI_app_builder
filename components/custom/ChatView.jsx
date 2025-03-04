@@ -16,6 +16,13 @@ import Prompt from "@/data/prompt";
 import { useMutation } from "convex/react";
 import ReactMarkdown from "react-markdown";
 import { useSidebar } from "@/components/ui/sidebar";
+
+export const countToken = (messages) => {
+  const userMessages = messages.filter((msg) => msg.role === "user");
+  const assistantMessages = messages.filter((msg) => msg.role === "assistant");
+  return userMessages.length + assistantMessages.length;
+};
+
 const ChatView = () => {
   const { id } = useParams();
   const convex = useConvex();
@@ -26,6 +33,7 @@ const ChatView = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messageEndRef = useRef(null);
   const { toggleSidebar } = useSidebar();
+
   useEffect(() => {
     id && GetWorkspaceData();
   }, [id]);

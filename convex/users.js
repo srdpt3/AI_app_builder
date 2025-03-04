@@ -24,9 +24,21 @@ export const createUser = mutation({
 export const GetUser = query({
   args: { email: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
+    // if user already exists
+    const user = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("email"), args.email))
       .first();
+    if (user) {
+      return user;
+    }
+    // if not exists create new user
+    return await ctx.runMutation(createUser, {
+      name: args.name,
+      email: args.email,
+      image: args.image,
+      authId: args.authId,
+      token: 50000,
+    });
   },
 });
