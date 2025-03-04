@@ -5,10 +5,12 @@ import { useEffect } from "react";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import Link from "next/link";
+import { useSidebar } from "@/components/ui/sidebar";
 const WorkSpaceHistory = () => {
   const { userDetail } = useContext(UserDetailContext);
   const convex = useConvex();
   const [workspaceHistory, setWorkspaceHistory] = useState([]);
+  const { toggleSidebar } = useSidebar();
   useEffect(() => {
     if (userDetail) {
       GetAllWorkspaceHistory();
@@ -31,7 +33,11 @@ const WorkSpaceHistory = () => {
       <div className="flex flex-col gap-2">
         {workspaceHistory?.map((workspace, index) => (
           <Link href={`/workspace/${workspace?._id}`} key={index}>
-            <h2 className="text-sm text-gray-500 mt-2 font-bold" key={index}>
+            <h2
+              onClick={() => toggleSidebar()}
+              className="text-sm text-gray-500 mt-2 font-bold"
+              key={index}
+            >
               {workspace?.message[0]?.content}
             </h2>
           </Link>

@@ -11,6 +11,7 @@ import { Plus } from "lucide-react";
 import WorkSpaceHistory from "./WorkSpaceHistory";
 import { UserDetailContext } from "@/app/context/UserDetailContext";
 import { useContext } from "react";
+import SideBarFooter from "./SideBarFooter";
 export function AppSidebar() {
   const { userDetail } = useContext(UserDetailContext);
   // Remove or comment out debug log
@@ -26,17 +27,19 @@ export function AppSidebar() {
           priority
           className="rounded-full object-cover"
         />{" "}
-      </SidebarHeader>
-      <SidebarContent className="p-5">
-        <Button className="w-full">
+        <Button className="w-full mt-5">
           <Plus />
           Start New Chat
         </Button>
-        <SidebarGroup>
-          <WorkSpaceHistory userDetail={userDetail} />
-        </SidebarGroup>
+      </SidebarHeader>
+      <SidebarContent className="p-5">
+        {/* <SidebarGroup> */}
+        <WorkSpaceHistory userDetail={userDetail} />
+        {/* </SidebarGroup> */}
       </SidebarContent>
-      <SidebarFooter />
+      <SidebarFooter>
+        <SideBarFooter />
+      </SidebarFooter>
     </Sidebar>
   );
 }

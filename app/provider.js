@@ -64,7 +64,7 @@ export function Provider({ children }) {
             <div className="sticky p-5">
               <Header />
             </div>
-            <SidebarProvider>
+            <SidebarProvider defaultOpen={true}>
               <AppSidebar />
               {children}
             </SidebarProvider>
